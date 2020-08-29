@@ -1,0 +1,20 @@
+﻿<div id="cartModal" class="uk-modal">
+    <div class="uk-modal-dialog">
+        <a class="uk-modal-close-default" uk-close></a>
+        <div class="uk-modal-header uk-margin-remove uk-flex uk-flex-middle">
+            <span class="uk-icon uk-preserve uk-margin-right" uk-icon="cart"></span>
+            <span>PRODUCTS DETAILS</span>
+        </div>
+
+        <div class="uk-position-center" id="loadingCircleForAddPinsModal" uk-spinner hidden></div>
+        <div id="modalAddPins" class="uk-modal-body uk-width-large uk-height-1-1">
+            <table id="productsList" class="uk-width-1-1">
+            </table>
+        </div>
+        
+        <div class="uk-modal-footer uk-text-right">
+            <div id="totalPrice" class="uk-h5 uk-text-bolder uk-text-background"></div>
+            <button id="saveButton" class="uk-button uk-button-primary" onclick="ga('send', 'event', 'Garment', 'Saving Cart', 'Cart', M.Page.Product.cartCount)">ORDER</button>
+        </div>
+    </div>
+</div>
