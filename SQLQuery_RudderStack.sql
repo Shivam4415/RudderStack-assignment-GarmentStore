@@ -1,14 +1,16 @@
 
+Create Database assignment
+go
+
+use assignment
+go
+
+
 Create Schema rudderstack
+GO
 
 
-select * from [RudderStack].[USERS]
-
-INSERT INTO [RudderStack].[USERS](Name, Email, Phone, Company, Password, DateCreated, Lastactive) 
-VALUES('Shivam', 'shivam441@gmail.com', '9007194710', 'Mapline', 'ShivamGupta441', GETUTCDATE(), GetUtcdate()) 
-
-
-CREATE TABLE [RudderStack].[USERS]
+CREATE TABLE  [rudderstack].[USERS]
 (
 	ID INT PRIMARY KEY IDENTITY(1,1),
 	NAME NVARCHAR(50),
@@ -21,8 +23,90 @@ CREATE TABLE [RudderStack].[USERS]
 	DATECREATED DATETIME,
 	LASTACTIVE DATETIME
 )
+Go
 
-CREATE PROCEDURE [RudderStack].[GetUserProfileByEmail]
+
+CREATE TABLE [rudderstack].[UserSessions]
+(
+	ID UNIQUEIDENTIFIER NOT NULL,
+	USERID INT NOT NULL FOREIGN KEY REFERENCES [rudderstack].[Users](ID),
+	LASTACCESS DATETIME NOT NULL,
+	ISPERSISTENT BIT NOT NULL DEFAULT(0),
+	ACCESSTOKEN NVARCHAR(MAX) NULL,
+	ACCESSTOKENEXPIRY DATETIME NULL,
+	LASTCHECKACCESSTOKEN DATETIME NULL
+)
+GO
+
+Create Table [rudderstack].[Product]
+(
+Id Int Primary Key Identity(1, 1),
+Name Nvarchar(50),
+Quantity Int,
+Source Nvarchar(50)
+)
+GO
+
+CREATE Table [rudderstack].[ProductSize]
+(
+ProductId Int NOT NULL Foreign Key References [rudderstack].[Product](Id),
+SizeId INT Not NULL	
+)
+GO
+
+CREATE TABLE [rudderstack].[ProductColor]
+(
+ProductId Int NOT NULL Foreign Key References [rudderstack].[Product](Id),
+ColorId Int Not NULL
+)
+GO
+
+Create Table [rudderstack].[ProductPrice]
+(
+Id Int Primary Key Identity(1, 1),
+ProductId Int NOT NULL Foreign Key References [rudderstack].[Product](Id),
+PriceId Int Not NULL,
+DateCreated DATETIME Not NULL,
+DateDeleted DateTime Default(NULL),
+IsDeleted Bit
+) 
+GO
+
+Create Table [rudderstack].[Price]
+(
+Id Int Primary Key Identity(1, 1),
+Value Int Not NULL  
+) 
+GO
+
+CREATE Table [rudderstack].[UserProduct]
+(
+Id Int Primary Key Identity(1, 1),
+UserId Int NOT NULL FOREIGN KEY REFERENCES [rudderstack].[USERS](ID),
+ProductId Int Not Null Foreign Key References [rudderstack].[Product](Id),
+Quantity Int Not Null,
+Price Int Not NULL,
+Color INT Not Null,
+Size Int Not Null,
+IsSaved Bit Default(0)
+)
+GO
+
+CREATE TYPE [rudderstack].[IntArrayTableType] AS TABLE(
+	[Id] [int] NOT NULL
+)
+GO
+
+CREATE TYPE [rudderstack].[ProductsTableType] AS TABLE(
+	Id INT NOT NULL,
+	Quantity INT NOT NULL,
+	Price INT NOT NULL
+)
+GO
+
+
+
+CREATE PROCEDURE [rudderstack].[GetUserProfileByEmail]
 @email NVARCHAR(50)
 AS
 BEGIN
@@ -36,7 +120,7 @@ BEGIN
 		DATECREATED,
 		LASTACTIVE
 	FROM
-		[RudderStack].[USERS]
+		[rudderstack].[USERS]
 	WHERE 
 		EMAIL = @email
 END
@@ -44,31 +128,18 @@ GO
 
 
 
-CREATE TABLE [RudderStack].[UserSessions]
-(
-	ID UNIQUEIDENTIFIER NOT NULL,
-	USERID INT NOT NULL FOREIGN KEY REFERENCES [RudderStack].[Users](ID),
-	LASTACCESS DATETIME NOT NULL,
-	ISPERSISTENT BIT NOT NULL DEFAULT(0),
-	ACCESSTOKEN NVARCHAR(MAX) NULL,
-	ACCESSTOKENEXPIRY DATETIME NULL,
-	LASTCHECKACCESSTOKEN DATETIME NULL
-)
-
-
-
  
-CREATE PROCEDURE [RudderStack].[RemoveUserSession]
+CREATE PROCEDURE [rudderstack].[RemoveUserSession]
 @sessionId UNIQUEIDENTIFIER
 AS
 BEGIN
-	DELETE FROM [RudderStack].[USERSESSIONS] WHERE ID = @sessionId
+	DELETE FROM [rudderstack].[USERSESSIONS] WHERE ID = @sessionId
 END
 GO
 
 
 
-CREATE PROCEDURE [RudderStack].[SetUserSession]
+CREATE PROCEDURE [rudderstack].[SetUserSession]
 @userId INT,
 @sessionId UNIQUEIDENTIFIER,
 @lastAccess DATETIME,
@@ -78,10 +149,10 @@ CREATE PROCEDURE [RudderStack].[SetUserSession]
 @lastCheckAccessToken DATETIME = NULL
 AS
 BEGIN
-	DELETE FROM [RudderStack].[USERSESSIONS] WHERE USERID = @userId
+	DELETE FROM [rudderstack].[USERSESSIONS] WHERE USERID = @userId
 
 	INSERT INTO 
-		[RudderStack].[USERSESSIONS](ID, USERID, LASTACCESS, ISPERSISTENT, ACCESSTOKEN, ACCESSTOKENEXPIRY, LASTCHECKACCESSTOKEN)
+		[rudderstack].[USERSESSIONS](ID, USERID, LASTACCESS, ISPERSISTENT, ACCESSTOKEN, ACCESSTOKENEXPIRY, LASTCHECKACCESSTOKEN)
 	VALUES
 		(@sessionId, @userId, @lastAccess, @isPersistent, @accessToken, @accessTokenExpiry, @lastCheckAccessToken)			
 END
@@ -89,7 +160,7 @@ GO
 
 
 
-CREATE PROCEDURE [RudderStack].[GetUserSession]
+CREATE PROCEDURE [rudderstack].[GetUserSession]
 @sessionId UNIQUEIDENTIFIER
 AS
 BEGIN
@@ -103,7 +174,7 @@ BEGIN
 		URS.ACCESSTOKENEXPIRY ,
 		URS.LASTCHECKACCESSTOKEN 
 	FROM
-		[RudderStack].[USERSESSIONS] URS
+		[rudderstack].[USERSESSIONS] URS
 	JOIN
 		USERS US
 	ON
@@ -116,7 +187,7 @@ GO
 
 
 
-CREATE PROCEDURE [RudderStack].[UpdateUserSession]
+CREATE PROCEDURE [rudderstack].[UpdateUserSession]
 @userId INT,
 @sessionId UNIQUEIDENTIFIER,
 @accessToken NVARCHAR(MAX) = NULL,
@@ -125,7 +196,7 @@ CREATE PROCEDURE [RudderStack].[UpdateUserSession]
 AS
 BEGIN
 	UPDATE 
-		[RudderStack].[USERSESSIONS]
+		[rudderstack].[USERSESSIONS]
 	SET
 		ACCESSTOKEN = @accessToken, 
 		ACCESSTOKENEXPIRY =@accessTokenExpiry, 
@@ -138,14 +209,14 @@ END
 GO
 
 
-CREATE PROCEDURE [RudderStack].[SlideUserSessionExpiration]
+CREATE PROCEDURE [rudderstack].[SlideUserSessionExpiration]
 @sessionId UNIQUEIDENTIFIER,
 @newExpirationTime DATETIME,
 @lastCheckAccessToken DATETIME = NULL
 AS
 BEGIN
 	UPDATE 
-		[RudderStack].[USERSESSIONS]
+		[rudderstack].[USERSESSIONS]
 	SET
 		LASTACCESS = @newExpirationTime, 
 		LASTCHECKACCESSTOKEN = @lastCheckAccessToken
@@ -162,130 +233,39 @@ END
 GO
 
 
---INSERT INTO RudderStack.Product(Name, Quantity, Source) Values('Shirt', 10, 'Img/Shirt/Blue.jpeg')
---INSERT INTO RudderStack.Product(Name, Quantity, Source) Values('Pant', 10, 'Img/Shirt/Blue.jpeg')
---INSERT INTO RudderStack.Product(Name, Quantity, Source) Values('Shoe', 10, 'Img/Shirt/Blue.jpeg')
---INSERT INTO RudderStack.Product(Name, Quantity, Source) Values('Socks', 10, 'Img/Shirt/Blue.jpeg')
-
---Insert INTO RudderStack.Price(Value) VALUES(1000)
---Insert INTO RudderStack.Price(Value) VALUES(2000)
---Insert INTO RudderStack.Price(Value) VALUES(3000)
---Insert INTO RudderStack.Price(Value) VALUES(4000)
---Insert INTO RudderStack.Price(Value) VALUES(5000)
---Insert INTO RudderStack.Price(Value) VALUES(6000) 
-
---INSERT INTO RudderStack.ProductSize(ProductId, SizeId) Values(1, 1)
---INSERT INTO RudderStack.ProductSize(ProductId, SizeId) Values(1, 2)
---INSERT INTO RudderStack.ProductSize(ProductId, SizeId) Values(1, 3)
---INSERT INTO RudderStack.ProductSize(ProductId, SizeId) Values(2, 1)
---INSERT INTO RudderStack.ProductSize(ProductId, SizeId) Values(2, 3)
---INSERT INTO RudderStack.ProductSize(ProductId, SizeId) Values(3, 1)
---INSERT INTO RudderStack.ProductSize(ProductId, SizeId) Values(3, 2)
---INSERT INTO RudderStack.ProductSize(ProductId, SizeId) Values(4, 1)
-
---INSERT INTO RudderStack.ProductColor(ProductId, ColorId) Values(1,1)
---INSERT INTO RudderStack.ProductColor(ProductId, ColorId) Values(1,2)
---INSERT INTO RudderStack.ProductColor(ProductId, ColorId) Values(2,1)
---INSERT INTO RudderStack.ProductColor(ProductId, ColorId) Values(2,2)
---INSERT INTO RudderStack.ProductColor(ProductId, ColorId) Values(2,3)
---INSERT INTO RudderStack.ProductColor(ProductId, ColorId) Values(3,1)
---INSERT INTO RudderStack.ProductColor(ProductId, ColorId) Values(3,2)
---INSERT INTO RudderStack.ProductColor(ProductId, ColorId) Values(4,2)
-
---INSERT INTO RudderStack.ProductPrice(ProductId, PriceId, DateCreated, IsDeleted) Values(1, 1, GetDate(), 0)
---INSERT INTO RudderStack.ProductPrice(ProductId, PriceId, DateCreated, IsDeleted) Values(2, 2, GetDate(), 0)
---INSERT INTO RudderStack.ProductPrice(ProductId, PriceId, DateCreated, IsDeleted) Values(3, 3, GetDate(), 0)
---INSERT INTO RudderStack.ProductPrice(ProductId, PriceId, DateCreated, IsDeleted, DateDeleted) Values(4, 4, GetDate(), 1, Getdate() + 1)
---INSERT INTO RudderStack.ProductPrice(ProductId, PriceId, DateCreated, IsDeleted) Values(4, 5, GetDate(), 0)
-
-Go
-
-SELECT * from Product
-select * from Price
-select * from ProductColor
-select * from ProductSize
-select * from ProductPrice
-GO
 
 
-Create Table [RudderStack].[Product]
-(
-Id Int Primary Key Identity(1, 1),
-Name Nvarchar(50),
-Quantity Int,
-Source Nvarchar(50)
-)
-
-CREATE Table [RudderStack].[ProductSize]
-(
-ProductId Int NOT NULL Foreign Key References [RudderStack].[Product](Id),
-SizeId INT Not NULL	
-)
-
-CREATE TABLE [RudderStack].[ProductColor]
-(
-ProductId Int NOT NULL Foreign Key References [RudderStack].[Product](Id),
-ColorId Int Not NULL
-)
-
-Create Table [RudderStack].[ProductPrice]
-(
-Id Int Primary Key Identity(1, 1),
-ProductId Int NOT NULL Foreign Key References [RudderStack].[Product](Id),
-PriceId Int Not NULL,
-DateCreated DATETIME Not NULL,
-DateDeleted DateTime Default(NULL),
-IsDeleted Bit
-) 
-
-Create Table [RudderStack].[Price]
-(
-Id Int Primary Key Identity(1, 1),
-Value Int Not NULL  
-) 
 
 
-CREATE Table [RudderStack].[UserProduct]
-(
-Id Int Primary Key Identity(1, 1),
-UserId Int NOT NULL FOREIGN KEY REFERENCES [RudderStack].[USERS](ID),
-ProductId Int Not Null Foreign Key References [RudderStack].[Product](Id),
-Quantity Int Not Null,
-Price Int Not NULL,
-Color INT Not Null,
-Size Int Not Null,
-IsSaved Bit Default(0)
-)
 
-
-CREATE Procedure [RudderStack].[GetAllProducts]
+CREATE Procedure [rudderstack].[GetAllProducts]
 AS
 BEGIN
 SELECT 
 	P.Id, P.Name, P.Quantity, P.Source AS Source, PS.Value AS Value, PS.Id AS Id
 FROM
-	[RudderStack].[Product] P
+	[rudderstack].[Product] P
 JOIN
-	[RudderStack].[ProductPrice] PR
+	[rudderstack].[ProductPrice] PR
 ON
 	P.Id = PR.ProductId AND PR.IsDeleted = 0
 JOIN
-	[RudderStack].[Price] PS
+	[rudderstack].[Price] PS
 ON
 	PS.Id = PR.PriceId
 END
 GO
 
 ---
-CREATE Procedure [RudderStack].[GetProductColor]
-@products [RudderStack].[IntArrayTableType] ReadOnly
+CREATE Procedure [rudderstack].[GetProductColor]
+@products [rudderstack].[IntArrayTableType] ReadOnly
 AS
 BEGIN
 SELECT 
 	PC.ProductId AS Id,
 	PC.ColorId AS ColorId
 FROM 
-	[RudderStack].[ProductColor] PC
+	[rudderstack].[ProductColor] PC
 JOIN
 	@products P
 ON
@@ -294,15 +274,15 @@ END
 GO
 
 
-CREATE Procedure [RudderStack].[GetProductSize]
-@products AS [RudderStack].[IntArrayTableType] ReadOnly
+CREATE Procedure [rudderstack].[GetProductSize]
+@products AS [rudderstack].[IntArrayTableType] ReadOnly
 AS
 BEGIN
 SELECT 
 	PS.ProductId AS Id,
 	PS.SizeId AS SizeId
 FROM 
-	[RudderStack].[ProductSize] PS
+	[rudderstack].[ProductSize] PS
 JOIN
 	@products P
 ON
@@ -312,7 +292,7 @@ GO
 
 
 
-CREATE Procedure [RudderStack].[GetUserProducts]
+CREATE Procedure [rudderstack].[GetUserProducts]
 @userId Int
 AS
 BEGIN
@@ -321,33 +301,24 @@ BEGIN
 	 UP.Color AS Color, 
 	 UP.Size AS Size, 
 	 UP.Price AS Value
-	FROM [RudderStack].[Product] P 
-	JOIN [RudderStack].[UserProduct] UP ON UP.ProductId = P.Id
+	FROM [rudderstack].[Product] P 
+	JOIN [rudderstack].[UserProduct] UP ON UP.ProductId = P.Id
 	WHERE UP.UserId = @userId
 END
 GO
 
 
-CREATE TYPE [RudderStack].[IntArrayTableType] AS TABLE(
-	[Id] [int] NOT NULL
-)
-
-CREATE TYPE [RudderStack].[ProductsTableType] AS TABLE(
-	Id INT NOT NULL,
-	Quantity INT NOT NULL,
-	Price INT NOT NULL
-)
 
 
-CREATE PROCEDURE [RudderStack].[SaveUserProducts]
+CREATE PROCEDURE [rudderstack].[SaveUserProducts]
 @userId Int,
-@products AS [RudderStack].[IntArrayTableType] ReadOnly
+@products AS [rudderstack].[IntArrayTableType] ReadOnly
 AS
 BEGIN
 	Update UP 
 	SET 
 	UP.IsSaved = 1
-	FROM [RudderStack].[UserProduct] UP
+	FROM [rudderstack].[UserProduct] UP
 	JOIN
 	@products P
 	ON P.Id = UP.ProductId
@@ -357,7 +328,7 @@ END
 GO
 
 
-CREATE PROCEDURE [RudderStack].[SaveUserProduct]
+CREATE PROCEDURE [rudderstack].[SaveUserProduct]
 @userId Int,
 @productId Int,
 @productPrice Int,
@@ -366,42 +337,103 @@ CREATE PROCEDURE [RudderStack].[SaveUserProduct]
 @productColor Int
 AS
 BEGIN
-	Insert Into [RudderStack].[UserProduct](UserId, ProductId, Quantity, Price, Size, Color)
+	Insert Into [rudderstack].[UserProduct](UserId, ProductId, Quantity, Price, Size, Color)
 	SELECT @userId, @productId, @productQuantity, @productPrice, @productSize, @productColor
 	SELECT 
 		Id AS Id, UserId AS UserId, 
-		Quantity as Quantity, ProductId As Id, Price AS Value From  [RudderStack].[UserProduct] WHERE Id = SCOPE_IDENTITY() 
+		Quantity as Quantity, ProductId As Id, Price AS Value From  [rudderstack].[UserProduct] WHERE Id = SCOPE_IDENTITY() 
 END
 GO
 
-CREATE PROCEDURE [RudderStack].[UpdateUserProduct]
+CREATE PROCEDURE [rudderstack].[UpdateUserProduct]
 @id Int,
 @price Int,
 @quantity Int
 AS
 BEGIN
-	Update [RudderStack].[UserProduct] SET Price = @price, Quantity = @quantity WHERE Id = @id
+	Update [rudderstack].[UserProduct] SET Price = @price, Quantity = @quantity WHERE Id = @id
 END
 GO
 
-CREATE PROCEDURE [RudderStack].[DeleteProduct]
+CREATE PROCEDURE [rudderstack].[DeleteProduct]
 @id Int
 AS 
 BEGIN
-	Delete From [RudderStack].[UserProduct] Where Id = @id
+	Delete From [rudderstack].[UserProduct] Where Id = @id
 END 
 GO
 
 
-select * from [RudderStack].UserProduct
 
-select * from [RudderStack].product
+--MIGRATION SCRIPTS---------------------
 
-update [RudderStack].Product set Source = 'Img/Pant/Black.jpeg' where Id = 2
-update [RudderStack].Product set Source = 'Img/Shoe/Red.jpeg' where Id = 3
 
-update [RudderStack].Product set Source = 'Img/Socks/Blue.jpeg' where Id = 4
+--INSERT INTO [rudderstack].[USERS](Name, Email, Phone, Company, Password, DateCreated, Lastactive) 
+--VALUES('Shivam', 'shivam441@gmail.com', '9007194710', 'Mapline', 'ShivamGupta441', GETUTCDATE(), GetUtcdate()) 
+--GO
 
-select * from [RudderStack].USERSESSIONS
 
-delete from [RudderStack].USERSESSIONS
+--INSERT INTO rudderstack.Product(Name, Quantity, Source) Values('Shirt', 10, 'Img/Shirt/Blue.jpeg')
+--INSERT INTO rudderstack.Product(Name, Quantity, Source) Values('Pant', 10, 'Img/Shirt/Blue.jpeg')
+--INSERT INTO rudderstack.Product(Name, Quantity, Source) Values('Shoe', 10, 'Img/Shirt/Blue.jpeg')
+--INSERT INTO rudderstack.Product(Name, Quantity, Source) Values('Socks', 10, 'Img/Shirt/Blue.jpeg')
+
+--Insert INTO rudderstack.Price(Value) VALUES(1000)
+--Insert INTO rudderstack.Price(Value) VALUES(2000)
+--Insert INTO rudderstack.Price(Value) VALUES(3000)
+--Insert INTO rudderstack.Price(Value) VALUES(4000)
+--Insert INTO rudderstack.Price(Value) VALUES(5000)
+--Insert INTO rudderstack.Price(Value) VALUES(6000) 
+
+--INSERT INTO rudderstack.ProductSize(ProductId, SizeId) Values(1, 1)
+--INSERT INTO rudderstack.ProductSize(ProductId, SizeId) Values(1, 2)
+--INSERT INTO rudderstack.ProductSize(ProductId, SizeId) Values(1, 3)
+--INSERT INTO rudderstack.ProductSize(ProductId, SizeId) Values(2, 1)
+--INSERT INTO rudderstack.ProductSize(ProductId, SizeId) Values(2, 3)
+--INSERT INTO rudderstack.ProductSize(ProductId, SizeId) Values(3, 1)
+--INSERT INTO rudderstack.ProductSize(ProductId, SizeId) Values(3, 2)
+--INSERT INTO rudderstack.ProductSize(ProductId, SizeId) Values(4, 1)
+
+--INSERT INTO rudderstack.ProductColor(ProductId, ColorId) Values(1,1)
+--INSERT INTO rudderstack.ProductColor(ProductId, ColorId) Values(1,2)
+--INSERT INTO rudderstack.ProductColor(ProductId, ColorId) Values(2,1)
+--INSERT INTO rudderstack.ProductColor(ProductId, ColorId) Values(2,2)
+--INSERT INTO rudderstack.ProductColor(ProductId, ColorId) Values(2,3)
+--INSERT INTO rudderstack.ProductColor(ProductId, ColorId) Values(3,1)
+--INSERT INTO rudderstack.ProductColor(ProductId, ColorId) Values(3,2)
+--INSERT INTO rudderstack.ProductColor(ProductId, ColorId) Values(4,2)
+
+--INSERT INTO rudderstack.ProductPrice(ProductId, PriceId, DateCreated, IsDeleted) Values(1, 1, GetDate(), 0)
+--INSERT INTO rudderstack.ProductPrice(ProductId, PriceId, DateCreated, IsDeleted) Values(2, 2, GetDate(), 0)
+--INSERT INTO rudderstack.ProductPrice(ProductId, PriceId, DateCreated, IsDeleted) Values(3, 3, GetDate(), 0)
+--INSERT INTO rudderstack.ProductPrice(ProductId, PriceId, DateCreated, IsDeleted, DateDeleted) Values(4, 4, GetDate(), 1, Getdate() + 1)
+--INSERT INTO rudderstack.ProductPrice(ProductId, PriceId, DateCreated, IsDeleted) Values(4, 5, GetDate(), 0)
+--GO
+
+
+
+-----------------------------------TESTING SCRIPTS-----------------------------------------
+
+----SELECT * from Product
+----select * from Price
+----select * from ProductColor
+----select * from ProductSize
+----select * from ProductPrice
+----GO
+
+
+
+----select * from [rudderstack].UserProduct
+
+----select * from [rudderstack].product
+
+----update [rudderstack].Product set Source = 'Img/Pant/Black.jpeg' where Id = 2
+----update [rudderstack].Product set Source = 'Img/Shoe/Red.jpeg' where Id = 3
+
+----update [rudderstack].Product set Source = 'Img/Socks/Blue.jpeg' where Id = 4
+
+----select * from [rudderstack].USERSESSIONS
+
+----delete from [rudderstack].USERSESSIONS
+----GO
+
