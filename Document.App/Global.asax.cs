@@ -20,7 +20,7 @@ namespace Document.App
 
         protected void Application_Start(object sender, EventArgs e)
         {
-            GlobalConnection.Editor = ConfigurationManager.ConnectionStrings["Editor"].ToString();
+            GlobalConnection.Editor = ConfigurationManager.ConnectionStrings["Assignment"].ToString();
 
             RouteConfig.RegisterRoutes(RouteTable.Routes);
 
