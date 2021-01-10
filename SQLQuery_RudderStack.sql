@@ -427,10 +427,10 @@ GO
 
 ----select * from [rudderstack].product
 
-----update [rudderstack].Product set Source = 'Img/Pant/Black.jpeg' where Id = 2
-----update [rudderstack].Product set Source = 'Img/Shoe/Red.jpeg' where Id = 3
+update [rudderstack].Product set Source = 'Img/Pant/Black.jpeg' where Id = 2
+update [rudderstack].Product set Source = 'Img/Shoe/Red.jpeg' where Id = 3
 
-----update [rudderstack].Product set Source = 'Img/Socks/Blue.jpeg' where Id = 4
+update [rudderstack].Product set Source = 'Img/Socks/Blue.jpeg' where Id = 4
 
 ----select * from [rudderstack].USERSESSIONS
 

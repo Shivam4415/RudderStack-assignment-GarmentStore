@@ -44,6 +44,10 @@ namespace Document.App
                 HttpCookie cookie = AuthManager.SignIn(user, true);
                 Response.SetCookie(cookie);
 
+                string script = "<script type='text/javascript'>window.onload = function () {M.DomUtil.getBrowserForIe();}; </script>";
+                ClientScript.RegisterStartupScript(GetType(), "Load", script);
+
+                Page.ClientScript.RegisterStartupScript(Page.GetType(), "identify", "M.identifyUser(" + user.Id +", " + user + ")", true);
                 Response.Redirect(FormsAuthentication.DefaultUrl, false);
 
             }

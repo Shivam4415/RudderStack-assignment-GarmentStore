@@ -26,10 +26,14 @@
     M.Util = {
         isNullOrUndefined: function (x) { return (x === null) || (x === undefined); },
         isNullUndefinedOrEmpty: function (x) { return ((x === null) || (x === undefined) || !x.length); },
+        identifyUser: function (userId, userTraits) {
+            return rudderanalytics.identify(userId, userTraits);
+        }
     };
 
     M.isNullOrUndefined = M.Util.isNullOrUndefined;
     M.isNullUndefinedOrEmpty = M.Util.isNullUndefinedOrEmpty;
+    M.identifyUser = M.Util.identifyUser;
 
 
     M.Enum = {
@@ -46,7 +50,7 @@
         ObjectType: {
             Product: "Product",
             Me: "Me"
-        },
+        }
     };
 
     M.Color = M.Enum.Color;
@@ -64,6 +68,7 @@
             return false;
         }
     };
+
 
     M.isFirstSubmit = M.Validators.isFirstSubmit;
 

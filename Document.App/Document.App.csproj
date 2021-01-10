@@ -100,6 +100,7 @@
     <Content Include="Js\jquery\jquery-3.4.1.js" />
     <Content Include="Js\jquery\jquery-3.4.1.min.js" />
     <Content Include="Js\modal\M.Modal.Cart.js" />
+    <Content Include="Js\page\Page.LearningWebform.js" />
     <Content Include="Js\page\Page.Product.js" />
     <Content Include="Js\uikit\uikit-icons.js" />
     <Content Include="Js\uikit\uikit-icons.min.js" />
@@ -110,6 +111,7 @@
     <Content Include="Js\uikit\uikit.min.css" />
     <Content Include="Js\uikit\uikit.min.js" />
     <Content Include="Js\uikit\uikit.theme.css" />
+    <Content Include="LearningWebform.aspx" />
     <Content Include="LoginPage.aspx" />
     <Content Include="ProductPage.aspx" />
     <Content Include="Register.aspx" />
@@ -132,6 +134,13 @@
     </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="LearningWebform.aspx.cs">
+      <DependentUpon>LearningWebform.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="LearningWebform.aspx.designer.cs">
+      <DependentUpon>LearningWebform.aspx</DependentUpon>
     </Compile>
     <Compile Include="LoginPage.aspx.cs">
       <DependentUpon>LoginPage.aspx</DependentUpon>

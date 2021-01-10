@@ -55,5 +55,24 @@ namespace Document.Library.Repo
             }
         }
 
+        public void SaveName(string name)
+        {
+            try
+            {
+                using (SqlConnection con = new SqlConnection(GlobalConnection.Editor))
+                {
+                    var param = new DynamicParameters();
+                    param.Add("@fullName", name);
+                    //Only Save -> con.Execute
+                    //Get  -> con.query
+                    //Save and Get -> con.query
+                    con.Execute("[SaveName]", param, null, commandType: CommandType.StoredProcedure);
+                }
+            }
+            catch
+            {
+                throw;
+            }
+        }
     }
 }

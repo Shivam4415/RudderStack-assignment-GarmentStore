@@ -17,25 +17,33 @@
     <script src="./Js/modal/M.Modal.Cart.js"></script>
     <!-- #include file="/Controls/CartModal.html"  -->
 
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-176740911-1"></script>
     <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-        gtag('config', 'UA-176740911-1');
+        rudderanalytics = window.rudderanalytics = [];
+        var methods = [
+            "load",
+            "page",
+            "track",
+            "identify",
+            "alias",
+            "group",
+            "ready",
+            "reset",
+            "getAnonymousId",
+            "setAnonymousId"
+        ];
+        for (var i = 0; i < methods.length; i++) {
+            var method = methods[i];
+            rudderanalytics[method] = function (methodName) {
+                return function () {
+                    rudderanalytics.push([methodName].concat(Array.prototype.slice.call(arguments)));
+                };
+            }(method);
+        }
+        rudderanalytics.load("1j5ihU9O6d9Ld1pxFNuVqHQogHt", "https://hosted.rudderlabs.com")
+        rudderanalytics.page();
     </script>
 
-    <!-- Google Tag Manager -->
-    <script>(function (w, d, s, l, i) {
-            w[l] = w[l] || []; w[l].push({
-                'gtm.start':
-                    new Date().getTime(), event: 'gtm.js'
-            }); var f = d.getElementsByTagName(s)[0],
-                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
-                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
-        })(window, document, 'script', 'dataLayer', 'GTM-T2W3T7V');</script>
-    <!-- End Google Tag Manager -->
+    <script src="https://cdn.rudderlabs.com/v1/rudder-analytics.min.js"></script>
 
 </head>
 <body>
@@ -65,7 +73,8 @@
             <div class="uk-flex uk-flex-wrap uk-width-1-1">
                 <div class="uk-width-1-4@s uk-background-default uk-position-relative">
                     <div height="200">
-                        <img id="imageCard" class="uk-padding-small-right" data-src="" uk-img></div>
+                        <img id="imageCard" class="uk-padding-small-right" data-src="" uk-img>
+                    </div>
                     <div class="uk-flex uk-flex-wrap uk-width-1-1">
                         <div class="uk-width-4-5">
                             <h2 id="productPrice" class="uk-text-bolder uk-text-secondary uk-margin-remove">Price</h2>
@@ -109,9 +118,9 @@
             </div>
         </div>
 
-    <form method="post" id="loginForm" autopostback="false" runat="server" class="uk-form uk-padding-small uk-margin-small-top uk-padding-remove-vertical">
-        <button id="btnSignOut" type="button" runat="server" class="uk-margin-left uk-button uk-button-secondary uk-width-1-1@l" name="SignOut" onserverclick="OnSignOut">SignOut</button>
-    </form>
+        <form method="post" id="loginForm" autopostback="false" runat="server" class="uk-form uk-padding-small uk-margin-small-top uk-padding-remove-vertical">
+            <button id="btnSignOut" type="button" runat="server" class="uk-margin-left uk-button uk-button-secondary uk-width-1-1@l" name="SignOut" onserverclick="OnSignOut">SignOut</button>
+        </form>
 
     </div>
     <input id="meObject" type="hidden" runat="server" />

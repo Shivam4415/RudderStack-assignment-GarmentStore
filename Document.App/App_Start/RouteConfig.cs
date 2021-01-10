@@ -24,6 +24,7 @@ namespace Document.App.App_Start
             routes.MapPageRoute("product", "product", "~/ProductPage.aspx");
             routes.MapPageRoute("error", "error", "~/Error.aspx");
             routes.MapPageRoute("register", "register", "~/Register.aspx");
+            routes.MapPageRoute("training", "training-session", "~/LearningWebform.aspx");
 
             routes.EnableFriendlyUrls(settings);
 

@@ -13,28 +13,36 @@ using System.Web.Http;
 
 namespace Document.App.Api.v1
 {
-    [Route("api/v1/users")]
+    [RoutePrefix("api/v1/users")]
     public class UsersController : ApiController
     {
+        //[HttpPost]
+        //public void Post([FromBody]UserProfile user)
+        //{
+        //    try
+        //    {
+        //        UserProfile _user = AuthManager.CurrentUser;
+        //        if(_user != null)
+        //            throw new RequestForbidden(new ErrorResponse(ErrorResponseCode.UserAccessDenied, Messages.RequestForbidden));
 
-        public void Post([FromBody]UserProfile user)
+        //        if (user == null)
+        //            throw new RequestForbidden(new ErrorResponse(ErrorResponseCode.InvalidRequestError, Messages.InvalidRequest));
+
+        //        UserServices.Add(user.Name, user.Email, user.Phone, user.Password, user.ConfirmPassword, user.Company);
+
+        //    }
+        //    catch
+        //    {
+
+        //    }
+        //}
+
+        [HttpPost]
+        public void Save([FromBody]string fullName)
         {
-            try
-            {
-                UserProfile _user = AuthManager.CurrentUser;
-                if(_user != null)
-                    throw new RequestForbidden(new ErrorResponse(ErrorResponseCode.UserAccessDenied, Messages.RequestForbidden));
+            UserServices.SaveName(fullName);
 
-                if (user == null)
-                    throw new RequestForbidden(new ErrorResponse(ErrorResponseCode.InvalidRequestError, Messages.InvalidRequest));
-
-                UserServices.Add(user.Name, user.Email, user.Phone, user.Password, user.ConfirmPassword, user.Company);
-
-            }
-            catch
-            {
-
-            }
         }
+
     }
 }

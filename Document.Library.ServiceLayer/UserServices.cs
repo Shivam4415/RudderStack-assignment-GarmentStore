@@ -67,6 +67,11 @@ namespace Document.Library.ServiceLayer
             return new UserRepository().IsUserExists(email);
         }
 
+        public static void SaveName(string fullName)
+        {
+            new UserRepository().SaveName(fullName);
+        }
+
 
     }
 }

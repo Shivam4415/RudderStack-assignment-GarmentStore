@@ -9,6 +9,34 @@
     <script src="./Js/uikit/uikit.js"></script>
     <script src="./Js/jquery/jquery-3.4.1.min.js"></script>
     <script src="./Js/uikit/uikit-icons.js"></script>
+    <script>
+        rudderanalytics = window.rudderanalytics = [];
+        var methods = [
+            "load",
+            "page",
+            "track",
+            "identify",
+            "alias",
+            "group",
+            "ready",
+            "reset",
+            "getAnonymousId",
+            "setAnonymousId"
+        ];
+        for (var i = 0; i < methods.length; i++) {
+            var method = methods[i];
+            rudderanalytics[method] = function (methodName) {
+                return function () {
+                    rudderanalytics.push([methodName].concat(Array.prototype.slice.call(arguments)));
+                };
+            }(method);
+        }
+        rudderanalytics.load("1j5ihU9O6d9Ld1pxFNuVqHQogHt", "https://hosted.rudderlabs.com")
+        rudderanalytics.page();
+    </script>
+
+    <script src="https://cdn.rudderlabs.com/v1/rudder-analytics.min.js"></script>
+
 </head>
 <body class="uk-background-default">
     <form id="mainForm" runat="server" autopostback="false">
@@ -19,26 +47,26 @@
             <div id="registerForm" class="uk-position-relative uk-text-center uk-position-top-center">
 
                 <div class="uk-width-1-1">
-                    <div class="uk-margin"> 
+                    <div class="uk-margin">
                         <input id="name" runat="server" class="uk-input uk-width-medium" placeholder="Name">
                     </div>
 
-                    <div class="uk-margin"> 
+                    <div class="uk-margin">
                         <input id="email" runat="server" class="uk-input uk-width-medium" placeholder="Email">
                     </div>
-                    <div class="uk-margin"> 
+                    <div class="uk-margin">
                         <input id="company" runat="server" class="uk-input uk-width-medium" placeholder="Company">
                     </div>
-                    <div class="uk-margin"> 
+                    <div class="uk-margin">
                         <input id="phone" runat="server" class="uk-input uk-width-medium" placeholder="Phone Number">
                     </div>
-                    <div class="uk-margin"> 
+                    <div class="uk-margin">
                         <input id="password" runat="server" class="uk-input uk-width-medium" placeholder="Password">
                     </div>
-                    <div class="uk-margin"> 
+                    <div class="uk-margin">
                         <input id="confirmpassword" runat="server" class="uk-input uk-width-medium" placeholder="Confirm Password">
                     </div>
-                    <div id="labelDiv" runat="server" class="uk-margin uk-alert uk-text-danger" hidden> 
+                    <div id="labelDiv" runat="server" class="uk-margin uk-alert uk-text-danger" hidden>
                         <label id="errorMessage" runat="server" class="uk-danger"></label>
                     </div>
                 </div>
