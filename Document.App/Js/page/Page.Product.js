@@ -68,6 +68,9 @@ M.Page.Product = (function () {
             $nextProduct = $("#nextProduct");
             $nextProduct.on('click', function () {
                 page.goToNext(products);
+                rudderanalytics.track('Products Searched', {
+                    query: products[page.onScreenProduct].Name,
+                });
             });
 
             $("#saveButton").on('click', function () {
@@ -81,10 +84,12 @@ M.Page.Product = (function () {
 
             $sizeDropDownList.change(function () {
                 page.updateSize(products, this);
+                page.productClicked(products[page.onScreenProduct], "No Var");
             });
 
             $colorDropDownList.change(function () {
                 page.updateColor(products, this);
+                page.productClicked(products[page.onScreenProduct], "No Var");
             });
 
             action.getAll().done(function (data) {
@@ -159,6 +164,21 @@ M.Page.Product = (function () {
             }
         },
 
+        "productClicked": function (p, v) {
+            rudderanalytics.track('Product Clicked', {
+                product_id: p.Id,
+                sku: 'F15',
+                category: p.Object,
+                name: p.Name,
+                brand: 'rudder-brand',
+                variant: v,
+                price: p.Price.Value / 100,
+                quantity: 1,
+                position: page.onScreenProduct,
+                image_url: p.Source,
+            });
+        },
+
         "saveCart": function (products) {
             var _product = [];
             page.cart.forEach(d => {
@@ -194,6 +214,17 @@ M.Page.Product = (function () {
                 M.Product.AddToCart(item).done(function (data) {
                     item.Id = data.Id;
                     $buttonRemoveFromCart.removeAttr('disabled');
+                    rudderanalytics.track("Product Added", {
+                        product_id: item.Id,
+                        sku: "F15",
+                        category: "Product",
+                        name: item.Product.Name,
+                        brand: "rudder-brand",
+                        variant: "no-var",
+                        price: item.Product.Price.Value / 100,
+                        quantity: item.Product.Price.Quantity,
+                        position: 1,
+                    });
                 });
             }
             else {
@@ -230,6 +261,20 @@ M.Page.Product = (function () {
                     status: 'danger',
                     timeout: '3000',
                     pos: 'top-center'
+                });
+                rudderanalytics.track("Product Removed", {
+                    product_id: "123",
+                    sku: "F15",
+                    category: "Games",
+                    name: "Game",
+                    brand: "Gamepro",
+                    variant: "111",
+                    price: 13.49,
+                    quantity: 11,
+                    coupon: "DISC21",
+                    position: 1,
+                    url: "https://www.website.com/product/path",
+                    image_url: "https://www.website.com/product/path.png",
                 });
             });
 
