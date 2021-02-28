@@ -1,4 +1,4 @@
-﻿//IIFE
+﻿//IIFE 
 M.Page.Product = (function () {
 
     var $colorDropDownList;
@@ -12,9 +12,10 @@ M.Page.Product = (function () {
     var $productSize;
     var $productName;
     var $cartToolTip;
-    
+
     var $cartButton;
     var $nextProduct;
+    var $previousProduct;
 
     var $imageCard;
 
@@ -24,7 +25,7 @@ M.Page.Product = (function () {
         "onScreenProduct": 0,
         "cart": [],
         "userId": 0,
-        
+
 
 
         //_userId = Me.get().UserId;
@@ -34,8 +35,7 @@ M.Page.Product = (function () {
             try {
                 ga('send', 'event', 'PageLoad');
             }
-            catch(error)
-            {
+            catch (error) {
                 console.log(error);
             }
 
@@ -52,7 +52,7 @@ M.Page.Product = (function () {
 
             $colorDropDownList = $("#colorDropDownList");
             $sizeDropDownList = $("#sizeDropDownList");
-            $buttonRemoveFromCart = $("#buttonRemoveFromCart");   
+            $buttonRemoveFromCart = $("#buttonRemoveFromCart");
 
 
 
@@ -64,6 +64,13 @@ M.Page.Product = (function () {
             $buttonAddToCart.on('click', function () {
                 page.addToCart(products);
             });
+            $previousProduct = $("#previousProduct");
+            $previousProduct.on('click', function () {
+                page.goToPrev(products);
+                rudderanalytics.track('Products Searched', {
+                    query: products[page.onScreenProduct].Name,
+                });
+            })
 
             $nextProduct = $("#nextProduct");
             $nextProduct.on('click', function () {
@@ -93,7 +100,7 @@ M.Page.Product = (function () {
             });
 
             action.getAll().done(function (data) {
-                 
+
                 data.forEach(d => {
                     var product = new M.Product(d);
                     products.push(product);
@@ -108,20 +115,19 @@ M.Page.Product = (function () {
                 util.updateSizeDropdown(products[page.onScreenProduct].Size);
 
                 var selectedProduct = page.getSelectedProduct(products[page.onScreenProduct]);
-                var cartProduct = page.cart.find(f => (f.Product.Id == selectedProduct.Id && selectedProduct.Size[0] == f.Product.Size[0] && selectedProduct.Color[0] == f.Product.Color[0]));
+                var cartProduct = page.cart.find(f => (f.Product.Id === selectedProduct.Id && selectedProduct.Size[0] === f.Product.Size[0] && selectedProduct.Color[0] === f.Product.Color[0]));
 
                 if (!M.isNullOrUndefined(cartProduct)) {
                     $buttonRemoveFromCart.removeAttr('disabled');
                 }
-                else
-                {
+                else {
                     $buttonRemoveFromCart.attr('disabled', 'disabled');
                 }
 
             });
 
             action.getUserProducts().done(function (data) {
-                page.cart = data.filter(f => (f.IsSaved != 1));
+                page.cart = data.filter(f => (f.IsSaved !== 1));
                 var quantity = 0;
                 page.cart.forEach(d => {
                     d.Product.Color[0] = M.Color[d.Product.Color[0]];
@@ -147,14 +153,14 @@ M.Page.Product = (function () {
             product.Color.push(parseInt($colorDropDownList.val()));
             return product;
         },
-        
+
         "updateColor": function (products, self) {
             var val = $(self).val();
             var color = "";
-            Object.keys(M.Color).forEach(key => { if (M.Color[key] == val) { color = key; } });
+            Object.keys(M.Color).forEach(key => { if (M.Color[key] === val) { color = key; } });
 
             var selectedProduct = page.getSelectedProduct(products[page.onScreenProduct]);
-            var cartProduct = page.cart.find(f => (f.Product.Id == selectedProduct.Id && selectedProduct.Size[0] == f.Product.Size[0] && selectedProduct.Color[0] == f.Product.Color[0]));
+            var cartProduct = page.cart.find(f => (f.Product.Id === selectedProduct.Id && selectedProduct.Size[0] === f.Product.Size[0] && selectedProduct.Color[0] === f.Product.Color[0]));
 
             if (!M.isNullOrUndefined(cartProduct)) {
                 $buttonRemoveFromCart.removeAttr('disabled');
@@ -204,7 +210,7 @@ M.Page.Product = (function () {
             var item = {};
             var screenItem = products[page.onScreenProduct];
             var selectedProduct = page.getSelectedProduct(screenItem);
-            var cartProduct = page.cart.find(f => (f.Product.Id == selectedProduct.Id && selectedProduct.Size[0] == f.Product.Size[0] && selectedProduct.Color[0] == f.Product.Color[0]));
+            var cartProduct = page.cart.find(f => (f.Product.Id === selectedProduct.Id && selectedProduct.Size[0] === f.Product.Size[0] && selectedProduct.Color[0] === f.Product.Color[0]));
 
             if (M.isNullOrUndefined(cartProduct)) {
                 item.Id = "";
@@ -247,11 +253,12 @@ M.Page.Product = (function () {
 
         "removeFromCart": function (products) {
             var screenItem = products[page.onScreenProduct];
+
             var selectedProduct = page.getSelectedProduct(screenItem);
-            var removeCartProduct = page.cart.find(f => (f.Product.Id == selectedProduct.Id && selectedProduct.Size[0] == f.Product.Size[0] && selectedProduct.Color[0] == f.Product.Color[0]));
+            var removeCartProduct = page.cart.find(f => (f.Product.Id === selectedProduct.Id && selectedProduct.Size[0] === f.Product.Size[0] && selectedProduct.Color[0] === f.Product.Color[0]));
             $buttonRemoveFromCart.attr('disabled', 'disabled');
             page.cart = page.cart.filter(f => {
-                return (!(f.Product.Id == selectedProduct.Id && selectedProduct.Size[0] == f.Product.Size[0] && selectedProduct.Color[0] == f.Product.Color[0]));
+                return (!(f.Product.Id === selectedProduct.Id && selectedProduct.Size[0] === f.Product.Size[0] && selectedProduct.Color[0] === f.Product.Color[0]));
             });
             M.Product.RemoveFromCart(removeCartProduct.Id).done(function () {
                 page.cartCount = page.cartCount - parseInt(removeCartProduct.Product.Quantity);
@@ -282,8 +289,42 @@ M.Page.Product = (function () {
 
         "updateCart": function (products) { },
 
+        "goToPrev": function (products) {
+            if (page.onScreenProduct === 0) {
+                UIkit.notification({
+                    message: 'No more previous product available. Please move Ahead',
+                    status: 'danger',
+                    timeout: '3000',
+                    pos: 'top-center'
+                });
+                return;
+            }
+            if (page.onScreenProduct > 0) {
+                page.onScreenProduct = page.onScreenProduct - 1;
+                util.updateUi(products[page.onScreenProduct], page.onScreenProduct);
+                util.updateColorDropdown(products[page.onScreenProduct].Color);
+                util.updateSizeDropdown(products[page.onScreenProduct].Size);
+            }
+
+
+
+            var selectedProduct = page.getSelectedProduct(products[page.onScreenProduct]);
+            var cartProduct = page.cart.find(f => (f.Product.Id === selectedProduct.Id && selectedProduct.Size[0] === f.Product.Size[0] && selectedProduct.Color[0] === f.Product.Color[0]));
+
+            if (!M.isNullOrUndefined(cartProduct)) {
+                $buttonRemoveFromCart.removeAttr('disabled');
+            }
+            else {
+                $buttonRemoveFromCart.attr('disabled', 'disabled');
+            }
+
+        },
+
+
+
+
         "goToNext": function (products) {
-            if (page.onScreenProduct == products.length - 1) {
+            if (page.onScreenProduct === products.length - 1) {
                 UIkit.notification({
                     message: 'No more product available. Please try again later',
                     status: 'danger',
@@ -299,7 +340,7 @@ M.Page.Product = (function () {
             util.updateSizeDropdown(products[page.onScreenProduct].Size);
 
             var selectedProduct = page.getSelectedProduct(products[page.onScreenProduct]);
-            var cartProduct = page.cart.find(f => (f.Product.Id == selectedProduct.Id && selectedProduct.Size[0] == f.Product.Size[0] && selectedProduct.Color[0] == f.Product.Color[0]));
+            var cartProduct = page.cart.find(f => (f.Product.Id === selectedProduct.Id && selectedProduct.Size[0] === f.Product.Size[0] && selectedProduct.Color[0] === f.Product.Color[0]));
 
             if (!M.isNullOrUndefined(cartProduct)) {
                 $buttonRemoveFromCart.removeAttr('disabled');
@@ -313,11 +354,11 @@ M.Page.Product = (function () {
         "updateSize": function (products, self) {
             var val = $(self).val();
             var size = "";
-            Object.keys(M.Size).forEach(key => { if (M.Size[key] == val) { size = key; } });
+            Object.keys(M.Size).forEach(key => { if (M.Size[key] === val) { size = key; } });
             $productSize.text(size.substring(0, 1));
 
             var selectedProduct = page.getSelectedProduct(products[page.onScreenProduct]);
-            var cartProduct = page.cart.find(f => (f.Product.Id == selectedProduct.Id && selectedProduct.Size[0] == f.Product.Size[0] && selectedProduct.Color[0] == f.Product.Color[0]));
+            var cartProduct = page.cart.find(f => (f.Product.Id === selectedProduct.Id && selectedProduct.Size[0] === f.Product.Size[0] && selectedProduct.Color[0] === f.Product.Color[0]));
 
             if (!M.isNullOrUndefined(cartProduct)) {
                 $buttonRemoveFromCart.removeAttr('disabled');
@@ -325,32 +366,21 @@ M.Page.Product = (function () {
             else {
                 $buttonRemoveFromCart.attr('disabled', 'disabled');
             }
-
         },
-
-        
-        
     };
 
     var util = {
-
-
-
-
         "updateUi": function (product, onScreenProduct) {
             $productName.text(product.Name);
             $productPrice.val(product.Price.Value);
             $productPrice.text("Rs." + product.Price.Value / 100);
             $productSize.text(product.Size[0].substring(0, 1));
             $imageCard.attr('data-src', window.location.origin + '/' + product.Source);
-
         },
 
         "updateColorDropdown": function (colors, selectedColor) {
-
             var colorId = 1;
             $colorDropdown = $colorDropDownList.empty();
-
             colors.forEach(
                 color => $colorDropdown.append(new Option(color, M.Color[color]))
             );

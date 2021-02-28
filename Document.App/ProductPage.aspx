@@ -111,7 +111,10 @@
                             <button id="buttonRemoveFromCart" class="uk-button uk-button-secondary uk-margin-right" disabled="">Remove From Cart</button>
                         </div>
                         <div class="uk-flex uk-width-1-3@s">
+                            <a class="uk-button alignleft uk-button-primary" id="previousProduct">Previous>></a>
+                          
                             <a class="uk-button uk-button-primary" id="nextProduct">Next>></a>
+                             
                         </div>
                     </div>
                 </div>
